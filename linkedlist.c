@@ -49,13 +49,9 @@ void* LinkedList_Get (const LinkedList *list, int pos) {
         return list->last->data;
     }
 
-    Cell *f;
-    for (register int i = 0; i < pos; i++) {
-        if (i == 0)
-            f = list->first;
-        else
-            f = f->next;
-    }
+    Cell *f = list->first;
+    for (register int i = 0; i < pos; i++)
+		f = f->next;
 
     return f->next->data;
 }
@@ -102,11 +98,18 @@ bool LinkedList_Insert (LinkedList *list, void *data, int pos) {
     if (pos < 0 || pos > list->size) // Lista nula ou posição inválida
         return false;
 
+	Cell *temp = (Cell*) malloc(sizeof (Cell));
+	if (!temp)
+		return false;
+		
+	temp->data = malloc(list->dataTypeSizeInBytes);
+	if (!temp->data) {
+		free(temp);
+		return false;
+	}
+		
     if (pos == 0) { // Insere na primeira posição
-
-        Cell *temp = (Cell*) malloc(sizeof (Cell));
-
-        temp->data = malloc(list->dataTypeSizeInBytes);
+		
         memcpy(temp->data, data, list->dataTypeSizeInBytes);
 
         if (list->size == 0) {
@@ -123,8 +126,7 @@ bool LinkedList_Insert (LinkedList *list, void *data, int pos) {
     }
 
     if (pos == list->size) { // Insere na última posição
-        Cell *temp = (Cell*) malloc(sizeof (Cell));
-        temp->data = malloc(list->dataTypeSizeInBytes);
+	
         memcpy(temp->data, data, list->dataTypeSizeInBytes);
 
         if (list->size == 0) {
@@ -151,9 +153,6 @@ bool LinkedList_Insert (LinkedList *list, void *data, int pos) {
             f = f->next;
     }
     // Nesse momento 'f' aponta para a posição anterior à que será inserido o elemento
-
-    Cell *temp = (Cell*) malloc(sizeof (Cell));
-    temp->data = malloc(list->dataTypeSizeInBytes);
     memcpy(temp->data, data, list->dataTypeSizeInBytes);
 
     temp->next = f->next;
@@ -262,6 +261,9 @@ void LinkedList_Clear (LinkedList *list) {
 
 LinkedList* LinkedList_Duplicate (const LinkedList *list) {
     LinkedList *temp = (LinkedList*) malloc(list->dataTypeSizeInBytes);
+	if (!temp) {
+		return false;
+	}
     LinkedList_Init(temp, list->dataTypeSizeInBytes);
     for (Cell *p = list->first; p != NULL; p = p->next)
         LinkedList_Insert(temp, p->data, LAST_POS);
