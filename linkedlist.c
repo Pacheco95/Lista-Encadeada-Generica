@@ -3,6 +3,8 @@
 #include <string.h>
 #include <stdbool.h>
 
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+
 static Cell* createCell (LinkedList *list, void *data) {
     Cell *temp = (Cell*) malloc(sizeof (Cell));
     if (!temp) return false;
