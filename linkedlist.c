@@ -1,15 +1,19 @@
-/*
-*	Implementação de uma lista encadeada
-*
-*	Autor: Michael Douglas Pacheco
-*	Data: 19/05/2015
-*	Hora: 21:04
-*/
-
 #include "linkedlist.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+
+static Cell* createCell (LinkedList *list, void *data) {
+    Cell *temp = (Cell*) malloc(sizeof (Cell));
+    if (!temp) return false;
+    temp->data = malloc(list->dataTypeSizeInBytes);
+    if (!temp->data) {
+        free(temp);
+        return temp;
+    }
+    memcpy(temp->data, data, list->dataTypeSizeInBytes);
+    return temp;
+}
 
 bool LinkedList_Init(LinkedList *list, int dataTypeSizeInBytes) {
     if (!list)
@@ -49,9 +53,13 @@ void* LinkedList_Get (const LinkedList *list, int pos) {
         return list->last->data;
     }
 
-    Cell *f = list->first;
-    for (register int i = 0; i < pos; i++)
-		f = f->next;
+    Cell *f;
+    for (register int i = 0; i < pos; i++) {
+        if (i == 0)
+            f = list->first;
+        else
+            f = f->next;
+    }
 
     return f->next->data;
 }
@@ -88,61 +96,96 @@ bool LinkedList_GetCopyOf (const LinkedList *list, int pos, void *backup) {
     return true;
 }
 
+bool LinkedList_PushFront (LinkedList *list, void *data) {
+    Cell *temp;
+    if (!(temp = createCell(list, data)))
+        return false;
+
+    if (list->size == 0) {
+        list->first = list->last = temp;
+        temp->next = NULL;
+        list->size++;
+        return true;
+    }
+
+    temp->next = list->first;
+    list->first = temp;
+    list->size++;
+    return true;
+}
+
+bool LinkedList_PushBack (LinkedList *list, void *data) {
+    Cell *temp;
+    if (!(temp = createCell(list, data)))
+        return false;
+
+    if (list->size == 0) {
+        list->first = list->last = temp;
+        temp->next = NULL;
+        list->size++;
+        return true;
+    } else {
+        list->last->next = temp;
+        list->last = temp;
+        list->last->next = NULL;
+    }
+
+    list->size++;
+    return true;
+}
+
+bool LinkedList_PopFront (LinkedList *list, void *backup) {
+    if (list->size == 1) {
+        memcpy(backup, list->first->data, list->dataTypeSizeInBytes);
+        LinkedList_Clear(list); // Portanto, apenas limpe a lista!
+    } else {
+        Cell *nextCpy = list->first->next;
+        memcpy(backup, list->first->data, list->dataTypeSizeInBytes);
+
+        free(list->first->data);
+        free(list->first);
+        list->first = nextCpy;
+        list->size--;
+    }
+    return true;
+}
+
+bool LinkedList_PopBack (LinkedList *list, void *backup) {
+    // Se a lista tiver apenas 1 elemento
+    if (list->size == 1) {
+        memcpy(backup, list->first->data, list->dataTypeSizeInBytes);
+        LinkedList_Clear(list);
+    }
+    // A lista possui mais de um elemento
+    else {
+        Cell *f, *last;
+        memcpy(backup, list->last->data, list->dataTypeSizeInBytes);
+
+        // Percorre a lista até encontrar o penúltimo elemento da lista
+        for (f = list->first; f != list->last; f = f->next)
+            last = f;
+
+        // Nesse momento 'last' aponta para o penúltimo elemeto da lista
+
+        free(list->last->data); // Remove o dado do último elemento
+        free(list->last); // Remove o último elemento
+        list->last = last; // Agora o último elemento se torna 'last'
+        list->last->next = NULL; // Portanto last->next deve ser NULL
+        list->size--;
+    }
+    return true;
+}
+
 bool LinkedList_Insert (LinkedList *list, void *data, int pos) {
-    if (!list)
+
+    if (!list || pos < 0 || pos > list->size) // Lista nula ou posição inválida
         return false;
 
-    if (pos == LAST_POS)
-        pos = list->size;
+    if (pos == 0) // Insere na primeira posição
+        return LinkedList_PushFront(list, data);
 
-    if (pos < 0 || pos > list->size) // Lista nula ou posição inválida
-        return false;
-
-	Cell *temp = (Cell*) malloc(sizeof (Cell));
-	if (!temp)
-		return false;
-		
-	temp->data = malloc(list->dataTypeSizeInBytes);
-	if (!temp->data) {
-		free(temp);
-		return false;
-	}
-		
-    if (pos == 0) { // Insere na primeira posição
-		
-        memcpy(temp->data, data, list->dataTypeSizeInBytes);
-
-        if (list->size == 0) {
-            list->first = list->last = temp;
-            temp->next = NULL;
-            list->size++;
-            return true;
-        }
-
-        temp->next = list->first;
-        list->first = temp;
-        list->size++;
-        return true;
-    }
-
-    if (pos == list->size) { // Insere na última posição
-	
-        memcpy(temp->data, data, list->dataTypeSizeInBytes);
-
-        if (list->size == 0) {
-            list->first = list->last = temp;
-            temp->next = NULL;
-            list->size++;
-            return true;
-        } else {
-            list->last->next = temp;
-            list->last = temp;
-            list->last->next = NULL;
-        }
-
-        list->size++;
-        return true;
-    }
+    if (pos == list->size) // Insere na última posição
+        return LinkedList_PushBack(list, data);
 
     // Insere no meio
     Cell *f;
@@ -153,7 +196,10 @@ bool LinkedList_Insert (LinkedList *list, void *data, int pos) {
             f = f->next;
     }
     // Nesse momento 'f' aponta para a posição anterior à que será inserido o elemento
-    memcpy(temp->data, data, list->dataTypeSizeInBytes);
+
+    Cell *temp;
+    if (!(temp = createCell(list, data)))
+        return false;
 
     temp->next = f->next;
     f->next = temp;
@@ -162,64 +208,19 @@ bool LinkedList_Insert (LinkedList *list, void *data, int pos) {
 }
 
 bool LinkedList_Remove (LinkedList *list, int pos, void *backup) {
-    if (!list) // A lista é nula
-        return false;
 
-    if (pos == LAST_POS)
-        pos = list->size - 1;
-
-    if (list->size <= 0) // Lista vazia
-        return false;
-
-    if (pos < 0 || pos >= list->size) // Posição inválida
+    if (!list || list->size <= 0 || pos < 0 || pos >= list->size) // Lista vazia ou nula ou posição inválida
         return false;
 
     // Remove da última posição
-    if (pos == list->size - 1) {
-        // Se a lista tiver apenas 1 elemento
-        if (list->size == 1) {
-            memcpy(backup, list->first->data, list->dataTypeSizeInBytes);
-            LinkedList_Clear(list);
-        }
-        // A lista possui mais de um elemento
-        else {
-            Cell *f, *last;
-            memcpy(backup, list->first->data, list->dataTypeSizeInBytes);
-
-            // Percorre a lista até encontrar o penúltimo elemento da lista
-            for (f = list->first; f != list->last; f = f->next)
-                last = f;
-
-            // Nesse momento 'last' aponta para o penúltimo elemeto da lista
-
-            free(list->last->data); // Remove o dado do último elemento
-            free(list->last); // Remove o último elemento
-            list->last = last; // Agora o último elemento se torna 'last'
-            list->last->next = NULL; // Portanto last->next deve ser NULL
-            list->size--;
-        }
-        return true;
-    }
+    if (pos == list->size - 1)
+        return LinkedList_PopBack(list, backup);
 
     // O usiário deseja remover um elemento do início
-    if (pos == 0) {
-        if (list->size == 1) {
-            memcpy(backup, list->first->data, list->dataTypeSizeInBytes);
+    if (pos == 0)
+        return LinkedList_PopFront(list, backup);
 
-            LinkedList_Clear(list); // Portanto, apenas limpe a lista!
-        } else {
-            Cell *nextCpy = list->first->next;
-            memcpy(backup, list->first->data, list->dataTypeSizeInBytes);
-
-            free(list->first->data);
-            free(list->first);
-            list->first = nextCpy;
-            list->size--;
-        }
-        return true;
-    }
-
-    // O usuário quer remover algum elemento no MEIO da lista, ou seja, não é nem o primeiro nem o último
+    // Remover algum elemento no MEIO da lista
     Cell *f, *nextCpy;
     for (register int i = 0; i < pos; i++) {
         if (i == 0)
@@ -261,9 +262,6 @@ void LinkedList_Clear (LinkedList *list) {
 
 LinkedList* LinkedList_Duplicate (const LinkedList *list) {
     LinkedList *temp = (LinkedList*) malloc(list->dataTypeSizeInBytes);
-	if (!temp) {
-		return false;
-	}
     LinkedList_Init(temp, list->dataTypeSizeInBytes);
     for (Cell *p = list->first; p != NULL; p = p->next)
         LinkedList_Insert(temp, p->data, LAST_POS);
