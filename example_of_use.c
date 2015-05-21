@@ -23,8 +23,6 @@ int main() {
 
     int x = 10;
 
-
-
     LinkedList_PushBack(&list, &x);
 
     if (LinkedList_IsEmpty(&list))
@@ -53,7 +51,7 @@ int main() {
 
 
     int *backup = (int*) malloc(sizeof (int));
-    printf("Elemento a ser removido: %d\n", *(  (int*) LinkedList_Get(&list, list.size-1)  ));
+    printf("Elemento a ser removido: %d\n", *(  (int*) LinkedList_GetLast(&list)  ));
     LinkedList_PopBack(&list, backup);
 
     printf("O elemento removido foi salvo na variavel backup: %d\n", *backup);
