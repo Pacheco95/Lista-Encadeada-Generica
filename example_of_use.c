@@ -2,8 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void ShowList (LinkedList *list);
-
 void ShowList (LinkedList *list) {
     for (register int i = 0; i < LinkedList_GetSize(list); ++i) {
         int x = *( (int*) LinkedList_Get(list, i) );
@@ -27,7 +25,7 @@ int main() {
 
 
 
-    LinkedList_Insert(&list, &x, LAST_POS);
+    LinkedList_PushBack(&list, &x);
 
     if (LinkedList_IsEmpty(&list))
         printf("Lista vazia!\n");
@@ -36,17 +34,17 @@ int main() {
 
     ShowList(&list);
     x++;
-    LinkedList_Insert(&list, &x, LAST_POS);
+    LinkedList_PushBack(&list, &x);
 	
     ShowList(&list);
     x++;
-    LinkedList_Insert(&list, &x, LAST_POS);
+    LinkedList_PushBack(&list, &x);
     ShowList(&list);
     x++;
-    LinkedList_Insert(&list, &x, LAST_POS);
+    LinkedList_PushBack(&list, &x);
     ShowList(&list);
     x++;
-    LinkedList_Insert(&list, &x, LAST_POS);
+    LinkedList_PushBack(&list, &x);
     ShowList(&list);
     x = 10;
 
@@ -55,8 +53,8 @@ int main() {
 
 
     int *backup = (int*) malloc(sizeof (int));
-    printf("Elemento a ser removido: %d\n", *(  (int*) LinkedList_Get(&list, 0)  ));
-    LinkedList_Remove(&list, 0, backup);
+    printf("Elemento a ser removido: %d\n", *(  (int*) LinkedList_Get(&list, list.size-1)  ));
+    LinkedList_PopBack(&list, backup);
 
     printf("O elemento removido foi salvo na variavel backup: %d\n", *backup);
     ShowList(&list);
