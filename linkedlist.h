@@ -29,8 +29,11 @@ bool            LinkedList_PushBack     (LinkedList *list, void *data);
 bool            LinkedList_PopFront     (LinkedList *list, void *backup);
 bool            LinkedList_PopBack      (LinkedList *list, void *backup);
 bool            LinkedList_Remove       (LinkedList *list, int pos, void *backup);
+bool            LinkedList_Swap         (LinkedList *list, int pos1, int pos2);
 void            LinkedList_Clear        (LinkedList *list);
+void            LinkedList_Copy         (LinkedList *dest, LinkedList *orig);
 LinkedList*     LinkedList_Duplicate    (const LinkedList *list);
+void            LinkedList_BubbleSort   (LinkedList *list, bool (*canSwap) (void *data1, void *data2));
 
 
 #endif // LINKEDLIST_H
