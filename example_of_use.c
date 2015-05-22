@@ -10,24 +10,30 @@ void ShowList (LinkedList *list) {
     printf("\n");
 }
 
-bool DecSort (void *x, void *y) {
+int DecSort (void *x, void *y) {
     int a = *((int*) x);
     int b = *((int*) y);
-    return a < b;
+    
+	if (a > b)
+		return -1;
+	else if (a < b)
+		return 1;
+	else
+		return 0;
 }
 
-bool PairSort (void *x, void *y) { // 3 7 2 6 2 3
+int PairSort (void *x, void *y) {
     int a = *((int*) x);
     int b = *((int*) y);
 	
 	if (a % 2 == 0 && b % 2 == 0) {
-		return a > b;
+		return a - b;
 	} else if (a % 2 == 0 && b % 2 != 0) {
-		return false;
+		return -1;
 	} else if (a % 2 != 0 && b % 2 == 0) {
-		return true;
+		return 1;
 	} else {
-		return a > b;
+		return a - b;
 	}
 }
 
@@ -85,7 +91,7 @@ int main() {
     ShowList(&list);
 	
 	puts("Ordenando de forma crescente com os pares primeiro...");
-    LinkedList_BubbleSort(&list, PairSort);
+    LinkedList_QuickSort(&list, 0, LinkedList_GetSize(&list) - 1, PairSort);
     ShowList(&list);
 
     puts("Limpando a lista...");
