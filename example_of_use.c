@@ -59,6 +59,10 @@ int main() {
 
     printf("Tamanho da lista: %d\n", LinkedList_GetSize(&list));
 
+    puts("Ordenando...");
+    LinkedList_BubbleSort(&list);
+    ShowList(&list);
+
     puts("Limpando a lista...");
     LinkedList_Clear(&list);
 
