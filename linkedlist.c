@@ -262,23 +262,19 @@ LinkedList* LinkedList_Duplicate (const LinkedList *list) {
     return temp;
 }
 
-inline void *LinkedList_GetFirst(const LinkedList *list)
-{
+inline void *LinkedList_GetFirst(const LinkedList *list) {
     if (!list)
         return NULL;
     return list->first->data;
 }
 
-inline void *LinkedList_GetLast(const LinkedList *list)
-{
+inline void *LinkedList_GetLast(const LinkedList *list) {
     if (!list)
         return NULL;
     return list->last->data;
 }
 
-
-void LinkedList_Copy(LinkedList *dest, LinkedList *orig)
-{
+void LinkedList_Copy(LinkedList *dest, LinkedList *orig) {
     if (!dest || !orig || dest->dataTypeSizeInBytes != orig->dataTypeSizeInBytes)
         return;
     LinkedList_Clear(dest);
@@ -305,12 +301,13 @@ bool LinkedList_Swap (LinkedList *list, int pos1, int pos2) {
     return true;
 }
 
-void LinkedList_BubbleSort(LinkedList *list, bool (*canSwap)(void *data1, void *data2))
-{
+LinkedList* LinkedList_BubbleSort(LinkedList *list, int (*canSwap)(void *data1, void *data2)) {
+    if (!list)
+        return NULL;
     for (int i = 0; i < list->size - 1; ++i) {
         bool quit = true;
         for (int j = 0; j < list->size - 1; ++j) {
-            if (canSwap(LinkedList_Get(list, j), LinkedList_Get(list, j+1))) {
+            if (canSwap(LinkedList_Get(list, j), LinkedList_Get(list, j+1)) > 0) {
                 LinkedList_Swap(list, j, j+1);
                 quit = false;
             }
@@ -318,4 +315,35 @@ void LinkedList_BubbleSort(LinkedList *list, bool (*canSwap)(void *data1, void *
         if (quit)
             break;
     }
+	return list;
 }
+
+LinkedList* LinkedList_QuickSort(LinkedList *list, int beg, int end, int (*compare)(void *data1, void *data2)) {
+	void* pivot = LinkedList_Get(list, (beg + end) / 2);
+	int i = beg;
+	int j = end;
+	
+	while (i < j) {
+        while (compare(LinkedList_Get(list, i), pivot) < 0 && i < end)
+            i++;
+
+        while (compare(LinkedList_Get(list, j), pivot) > 0 && i < end)
+            j--;
+
+        if (i <= j) {
+			LinkedList_Swap(list, i, j);
+            i++;
+            j--;
+        }
+    }
+
+    if (i < end)
+        LinkedList_QuickSort(list, i, end, compare);
+    if (j > beg)
+        LinkedList_QuickSort(list, beg, j, compare);
+
+    return list;	
+}
+
+
+
