@@ -10,6 +10,27 @@ void ShowList (LinkedList *list) {
     printf("\n");
 }
 
+bool DecSort (void *x, void *y) {
+    int a = *((int*) x);
+    int b = *((int*) y);
+    return a < b;
+}
+
+bool PairSort (void *x, void *y) { // 3 7 2 6 2 3
+    int a = *((int*) x);
+    int b = *((int*) y);
+	
+	if (a % 2 == 0 && b % 2 == 0) {
+		return a > b;
+	} else if (a % 2 == 0 && b % 2 != 0) {
+		return false;
+	} else if (a % 2 != 0 && b % 2 == 0) {
+		return true;
+	} else {
+		return a > b;
+	}
+}
+
 int main() {
     LinkedList list;
     LinkedList_Init(&list, sizeof(int));
@@ -59,8 +80,12 @@ int main() {
 
     printf("Tamanho da lista: %d\n", LinkedList_GetSize(&list));
 
-    puts("Ordenando...");
-    LinkedList_BubbleSort(&list);
+    puts("Ordenando de forma decrescente...");
+    LinkedList_BubbleSort(&list, DecSort);
+    ShowList(&list);
+	
+	puts("Ordenando de forma crescente com os pares primeiro...");
+    LinkedList_BubbleSort(&list, PairSort);
     ShowList(&list);
 
     puts("Limpando a lista...");
