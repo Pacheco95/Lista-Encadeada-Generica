@@ -3,8 +3,6 @@
 #include <string.h>
 #include <stdbool.h>
 
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-
 static Cell* createCell (LinkedList *list, void *data) {
     Cell *temp = (Cell*) malloc(sizeof (Cell));
     if (!temp) return false;
@@ -48,7 +46,7 @@ void* LinkedList_Get (const LinkedList *list, int pos) {
     if (pos == list->size - 1)
         return list->last->data;
 
-    Cell *f;
+    Cell *f = NULL;
     for (register int i = 0; i < pos; i++) {
         if (i == 0)
             f = list->first;
@@ -124,6 +122,8 @@ bool LinkedList_PushBack (LinkedList *list, void *data) {
 }
 
 bool LinkedList_PopFront (LinkedList *list, void *backup) {
+    if (!list)
+        return false;
     if (list->size == 1) {
         memcpy(backup, list->first->data, list->dataTypeSizeInBytes);
         LinkedList_Clear(list); // Portanto, apenas limpe a lista!
@@ -140,6 +140,9 @@ bool LinkedList_PopFront (LinkedList *list, void *backup) {
 }
 
 bool LinkedList_PopBack (LinkedList *list, void *backup) {
+    if (!list)
+        return false;
+
     // Se a lista tiver apenas 1 elemento
     if (list->size == 1) {
         memcpy(backup, list->first->data, list->dataTypeSizeInBytes);
@@ -147,7 +150,7 @@ bool LinkedList_PopBack (LinkedList *list, void *backup) {
     }
     // A lista possui mais de um elemento
     else {
-        Cell *f, *last;
+        Cell *f = NULL, *last = NULL;
         memcpy(backup, list->last->data, list->dataTypeSizeInBytes);
 
         // Percorre a lista até encontrar o penúltimo elemento da lista
@@ -177,7 +180,7 @@ bool LinkedList_Insert (LinkedList *list, void *data, int pos) {
         return LinkedList_PushBack(list, data);
 
     // Insere no meio
-    Cell *f;
+    Cell *f = NULL;
     for (register int i = 0; i < pos; i++) {
         if (i == 0)
             f = list->first;
@@ -210,7 +213,7 @@ bool LinkedList_Remove (LinkedList *list, int pos, void *backup) {
         return LinkedList_PopFront(list, backup);
 
     // Remover algum elemento no MEIO da lista
-    Cell *f, *nextCpy;
+    Cell *f = NULL, *nextCpy;
     for (register int i = 0; i < pos; i++) {
         if (i == 0)
             f = list->first;
@@ -230,7 +233,7 @@ bool LinkedList_Remove (LinkedList *list, int pos, void *backup) {
 }
 
 void LinkedList_Clear (LinkedList *list) {
-    if (list->size <= 0 || list->first == NULL)
+    if (!list || list->size <= 0 || list->first == NULL)
         return;
 
     // 'curr' iniciará apontando para o primeiro elemento da lista e next para o segundo
@@ -250,6 +253,8 @@ void LinkedList_Clear (LinkedList *list) {
 }
 
 LinkedList* LinkedList_Duplicate (const LinkedList *list) {
+    if (!list)
+        return NULL;
     LinkedList *temp = (LinkedList*) malloc(list->dataTypeSizeInBytes);
     LinkedList_Init(temp, list->dataTypeSizeInBytes);
     for (Cell *p = list->first; p != NULL; p = p->next)
@@ -259,10 +264,58 @@ LinkedList* LinkedList_Duplicate (const LinkedList *list) {
 
 inline void *LinkedList_GetFirst(const LinkedList *list)
 {
+    if (!list)
+        return NULL;
     return list->first->data;
 }
 
 inline void *LinkedList_GetLast(const LinkedList *list)
 {
+    if (!list)
+        return NULL;
     return list->last->data;
+}
+
+
+void LinkedList_Copy(LinkedList *dest, LinkedList *orig)
+{
+    if (!dest || !orig || dest->dataTypeSizeInBytes != orig->dataTypeSizeInBytes)
+        return;
+    LinkedList_Clear(dest);
+    dest->dataTypeSizeInBytes = orig->dataTypeSizeInBytes;
+    for (int i = 0; i < orig->size; ++i) {
+        LinkedList_PushBack(dest, LinkedList_Get(orig, i));
+    }
+}
+
+bool LinkedList_Swap (LinkedList *list, int pos1, int pos2) {
+    if (!list || pos1 < 0 || pos2 < 0 || pos1 >= list->size || pos2 >= list->size || pos1 == pos2)
+        return false;
+
+    void *temp = malloc(list->dataTypeSizeInBytes);
+    if (!temp)
+        return false;
+
+    memcpy(temp, LinkedList_Get(list, pos1), list->dataTypeSizeInBytes);
+
+    memcpy(LinkedList_Get(list, pos1), LinkedList_Get(list, pos2), list->dataTypeSizeInBytes);
+    memcpy(LinkedList_Get(list, pos2), temp, list->dataTypeSizeInBytes);
+
+    free(temp);
+    return true;
+}
+
+void LinkedList_BubbleSort(LinkedList *list, bool (*canSwap)(void *data1, void *data2))
+{
+    for (int i = 0; i < list->size - 1; ++i) {
+        bool quit = true;
+        for (int j = 0; j < list->size - 1; ++j) {
+            if (canSwap(LinkedList_Get(list, j), LinkedList_Get(list, j+1))) {
+                LinkedList_Swap(list, j, j+1);
+                quit = false;
+            }
+        }
+        if (quit)
+            break;
+    }
 }
