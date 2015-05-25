@@ -122,9 +122,9 @@ bool LinkedList_PushBack (LinkedList *list, void *data) {
 }
 
 bool LinkedList_PopFront (LinkedList *list, void *backup) {
-    if (!list)
-        return false;
-    if (list->size == 1) {
+	if (list->size == 0)
+		return false;
+    else if (list->size == 1) {
         memcpy(backup, list->first->data, list->dataTypeSizeInBytes);
         LinkedList_Clear(list); // Portanto, apenas limpe a lista!
     } else {
