@@ -5,3 +5,8 @@
 ###### Versão: 2.0
 Projeto de implementação, em C, de uma lista encadeada genérica.
 Implementação em andamento.
+
+```python
+def teste():
+  pass
+```
