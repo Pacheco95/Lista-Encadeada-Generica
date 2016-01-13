@@ -5,4 +5,3 @@
 ###### Versão: 2.0
 Projeto de implementação, em C, de uma lista encadeada genérica.
 Implementação em andamento.
-> Testando anotaajlbfçskjgbdfk~jgbadf~hjkdfa~dkfbdfuiab~sjdfhs~doifghõgirhng~eorjkhõrihe~roayhneryae
